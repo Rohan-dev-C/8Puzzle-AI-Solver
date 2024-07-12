@@ -86,21 +86,23 @@ namespace FirstDayAssignment
         }
 
 
-        public VertexWrapper<T> DFSSelection(List<VertexWrapper<T>> vertices)
+        public VertexWrapper<T> DFSSelection(List<VertexWrapper<T>> vertices, List<VertexWrapper<T>> currPath)
         {
             VertexWrapper<T> node = vertices[^1];
             vertices.Remove(node);
+            currPath.Add(node);
             return node;
         }
 
-        public VertexWrapper<T> BFSSelection(List<VertexWrapper<T>> vertices) 
+        public VertexWrapper<T> BFSSelection(List<VertexWrapper<T>> vertices, List<VertexWrapper<T>> currPath) 
         {
             VertexWrapper<T> node = vertices[0];
             vertices.Remove(node);
+            currPath.Add(node); 
             return node;
         }
 
-        public VertexWrapper<T> DjikstraSelection(List<VertexWrapper<T>> vertices) 
+        public VertexWrapper<T> DjikstraSelection(List<VertexWrapper<T>> vertices, List<VertexWrapper<T>> currPath) 
         {
             VertexWrapper<T> node = vertices[0];
             foreach (VertexWrapper<T> v in vertices)
@@ -114,6 +116,7 @@ namespace FirstDayAssignment
                 }
             }
             vertices.Remove(node);
+            currPath.Add(node);
             return node; 
         }
 
@@ -151,7 +154,7 @@ namespace FirstDayAssignment
             return dx + dy + (Math.Sqrt(2) - 2) * Math.Min(dx, dy);
         }
 
-        public List<Vertex<T>> BestFirstSearch(T start, T end, Func<List<VertexWrapper<T>>, VertexWrapper<T>> selection)
+        public List<Vertex<T>> BestFirstSearch(T start, T end, Func<List<VertexWrapper<T>>, List<VertexWrapper<T>>, VertexWrapper<T>> selection)
         {
             HashSet<Vertex<T>> visited = new HashSet<Vertex<T>>();
 
@@ -160,19 +163,21 @@ namespace FirstDayAssignment
             visited.Clear(); 
             List<Vertex<T>> result = new List<Vertex<T>>();
             List<VertexWrapper<T>> Frontier = new List<VertexWrapper<T>>(); 
+            List<VertexWrapper<T>> WrapperPath = new List<VertexWrapper<T>>(); 
             VertexWrapper<T> curr = null;
             var temp = new VertexWrapper<T>(starting, null, 0);
             Frontier.Add(temp);
             while (Frontier.Count >= 0)
             {
-                curr = selection(Frontier); 
-                if (!result.Contains(curr.vertex))
-                {
-                    result.Add(curr.vertex);
-                }
+                curr = selection(Frontier, WrapperPath); 
                 visited.Add(curr.vertex); 
                 if (curr.vertex == ending)
                 {
+                    while (curr.prevWrapper != null)
+                    {
+                        result.Add(curr.vertex);
+                        curr = curr.prevWrapper;
+                    }
                     return result;
                 }
                 for (int i = 0; i < curr.vertex.Neighbors.Count; i++)
@@ -184,6 +189,11 @@ namespace FirstDayAssignment
                 }
                 if (Frontier.Count == 0)
                 {
+                    while(curr.prevWrapper != null)
+                    {
+                        result.Add(curr.vertex);
+                        curr = curr.prevWrapper; 
+                    }
                     return result;
                 }
             }
@@ -230,8 +240,6 @@ namespace FirstDayAssignment
             }
             return result;
         }
-
-
         public List<Vertex<T>> BFS(T start, T end)
         {
             HashSet<Vertex<T>> visited = new HashSet<Vertex<T>>();
@@ -266,7 +274,6 @@ namespace FirstDayAssignment
             }
             return result;
         }
-
         public static List<Vertex<T>> Djikstra(Graph<T> graph, T starting, T ending)
         {
             HashSet<Vertex<T>> visited = new HashSet<Vertex<T>>();
