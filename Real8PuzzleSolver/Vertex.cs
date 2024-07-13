@@ -178,12 +178,13 @@ namespace Real8PuzzleSolver
         }
 
         public List<GameState> BestFirstSearch(GameState starting, GameState ending, Func<List<GameStateWrapper<T>>, GameStateWrapper<T>> selection, Action action, System.Windows.Forms.Timer timer)
-        {
+        { 
+            /*
             timer.Interval = 100;
             timer.Start();
             bool ticked = false;
             timer.Tick += (object? sender, EventArgs e) => ticked = true;
-
+            */
             HashSet<GameState> visited = new HashSet<GameState>();
             visited.Clear();
             List<GameState> result = new List<GameState>();
@@ -208,7 +209,16 @@ namespace Real8PuzzleSolver
                 var currNeighbors = curr.vertex.GenerateNextNeighbors(); 
                 for (int i = 0; i < currNeighbors.Count; i++)
                 {
-                    if (!visited.Contains(currNeighbors[i]))
+                    bool Contains = false;
+                    foreach (var item in visited)
+                    {
+                        if(item.currentState == currNeighbors[i].currentState)
+                        {
+                            Contains = true;
+                        }
+                    }
+                    if (!Contains)
+                    //if (!visited.Contains(currNeighbors[i]))
                     {
                         Frontier.Add(new GameStateWrapper<T>(currNeighbors[i], curr, curr.CumulativeDistance + 1, ManhattanSeries(curr.vertex)));
                     } // loop over visited and contain manually check if its contained
@@ -224,13 +234,14 @@ namespace Real8PuzzleSolver
                         result.Add(curr.vertex);
                         curr = curr.prevWrapper;
                     }
+                    result.Reverse(); 
                     return result;
                 }
-
+                /*
                 while (!ticked) {
                     ticked = false;
                     action();
-                }
+                } */
             }
             return null;
         }

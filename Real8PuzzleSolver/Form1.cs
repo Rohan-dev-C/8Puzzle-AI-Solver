@@ -28,7 +28,7 @@ namespace Real8PuzzleSolver
             {
                 for (int j = 0; j < 3; j++)
                 {
-                    button[i, j].Text = currentGameStateArray[i, j].ToString();
+                    button[i, j].Text = currentGameState.currentState[i, j].ToString();
                 }
             }
             
@@ -100,7 +100,13 @@ namespace Real8PuzzleSolver
             }
         }
 
-
+        public void ShowPath(List<GameState> path)
+        {
+            currentGameState.currentState = path[0].currentState;
+            UpdateScreen();
+            path.Remove(path[0]); 
+        }
+        List<GameState> path = new List<GameState>(); 
         private void Form1_Load(object sender, EventArgs e)
         {
             button[0, 0] = button1;
@@ -117,7 +123,7 @@ namespace Real8PuzzleSolver
             FinalGameState = new GameState(FinalGameStateArray);
             UpdateScreen(); 
         }
-
+        bool finishedSearching = false;
         private void ShuffleButton_Click(object sender, EventArgs e)
         {
             ShuffleTiles(currentGameState, 1000);
@@ -126,11 +132,21 @@ namespace Real8PuzzleSolver
 
         private void SolveButton_Click(object sender, EventArgs e)
         {
-            puzzle.BestFirstSearch(currentGameState,FinalGameState, puzzle.AStarSelection, UpdateScreen, timer1); 
+            path = puzzle.BestFirstSearch(currentGameState,FinalGameState, puzzle.AStarSelection, UpdateScreen, timer1);
+            finishedSearching = true;
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (finishedSearching)
+            {
+                for (int i = 0; i < path.Count; i++)
+                {
+                    ShowPath(path); 
+                }
+                timer1.Enabled = false; 
+            }
+
         }
     }
 }
